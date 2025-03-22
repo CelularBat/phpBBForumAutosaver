@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stub Forum Post - PHPBB Style</title>
+    <style>
+        /* General Page Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ecf0;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .forum-container {
+            width: 60%;
+            margin: auto;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #0056a3;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .forum-title {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px;
+            background: #0056a3;
+            color: white;
+            border-bottom: 2px solid #003d75;
+        }
+
+        .toolbar {
+            margin: 10px 0;
+            background: #e6e6e6;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .toolbar button {
+            background: #0056a3;
+            color: white;
+            border: 1px solid #003d75;
+            padding: 5px 8px;
+            margin: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+
+        .toolbar button:hover {
+            background: #003d75;
+        }
+
+        textarea {
+            width: calc(100% - 22px);
+            height: 150px;
+            border: 1px solid #0056a3;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            background: #f9f9f9;
+            display: block;
+            white-space: pre-wrap;
+        }
+
+        .preview-container {
+            margin-top: 10px;
+            padding: 10px;
+            background: #eef3f8;
+            border: 1px solid #0056a3;
+            border-radius: 5px;
+            min-height: 50px;
+            white-space: pre-wrap;
+        }
+
+        blockquote {
+            background: #ddd;
+            padding: 5px;
+            border-left: 5px solid #aaa;
+            margin: 5px 0;
+        }
+
+        pre {
+            background: black;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+
+        .toggle-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .toggle-button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .toggle-on {
+            background: green;
+        }
+
+        .toggle-off {
+            background: red;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-C-iApklu.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CxM_xE5P.css">
+</head>
+<body>
+
+<div class="forum-container">
+    <div class="forum-title">This is a stub forum post page to test how it works</div>
+    
+    <div class="toggle-container">
+        <button id="allowAutosaver" class="toggle-button toggle-off" onclick="toggleAutosaver()">Activate Autosaver</button>
+    </div>
+
+    <div class="toolbar">
+        <button onclick="insertBBCode('[b]', '[/b]')"><b>B</b></button>
+        <button onclick="insertBBCode('[i]', '[/i]')"><i>I</i></button>
+        <button onclick="insertBBCode('[u]', '[/u]')"><u>U</u></button>
+        <button onclick="insertBBCode('[quote]', '[/quote]')">Quote</button>
+        <button onclick="insertBBCode('[code]', '[/code]')">Code</button>
+    </div>
+
+    <textarea id="message" onkeyup="updatePreview()"></textarea>
+
+    <div class="preview-container" id="bbcode-preview"></div>
+</div>
+
+<script>
+    function insertBBCode(startTag, endTag) {
+        let textarea = document.getElementById("message");
+        let start = textarea.selectionStart;
+        let end = textarea.selectionEnd;
+        let text = textarea.value;
+
+        let selectedText = text.substring(start, end);
+        let newText = text.substring(0, start) + startTag + selectedText + endTag + text.substring(end);
+        
+        textarea.value = newText;
+        updatePreview();
+        textarea.focus();
+        textarea.setSelectionRange(start + startTag.length, end + startTag.length);
+    }
+
+    function updatePreview() {
+        let text = document.getElementById("message").value;
+        let preview = document.getElementById("bbcode-preview");
+
+        let formattedText = text
+            .replace(/\[b\]([\s\S]*?)\[\/b\]/g, "<b>$1</b>")
+            .replace(/\[i\]([\s\S]*?)\[\/i\]/g, "<i>$1</i>")
+            .replace(/\[u\]([\s\S]*?)\[\/u\]/g, "<u>$1</u>")
+            .replace(/\[quote\]([\s\S]*?)\[\/quote\]/g, "<blockquote>$1</blockquote>")
+            .replace(/\[code\]([\s\S]*?)\[\/code\]/g, function(match, p1) {
+                return "<pre>" + p1.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\[/g, "&#91;").replace(/\]/g, "&#93;") + "</pre>";
+            })
+            .replace(/\n/g, "<br>");
+
+        preview.innerHTML = formattedText;
+    }
+
+    
+    function toggleAutosaver() {
+        let button = document.getElementById("allowAutosaver");
+        let isActive = button.classList.contains("toggle-on");
+        
+        if (isActive) {
+            button.classList.remove("toggle-on");
+            button.classList.add("toggle-off");
+        } else {
+            button.classList.remove("toggle-off");
+            button.classList.add("toggle-on");
+        }
+    }
+</script>
+
+</body>
+</html>
