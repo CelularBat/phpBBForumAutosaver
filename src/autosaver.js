@@ -44,8 +44,8 @@ const SETTINGS = {
 }
 */
 
-
-import { createElement, Save, RotateCcw, Layers, Trash2 } from "lucide";
+import { settingsMenu } from './settingsMenu.js';
+import { createElement, Save, RotateCcw, Layers, Trash2, Settings  } from "lucide";
 
 const phpBBForumAutosaver_g_textArea = document.querySelector("textarea#message");
 var phpBBForumAutosaver_g_ID_current, phpBBForumAutosaver_g_ID_old;
@@ -56,11 +56,8 @@ var phpBBForumAutosaver_g_panelButtons=[];
 
 function Setup_PhpBBForumAutosaver(){
     // userscript menu
-    if (typeof myGM_registerMenuCommandVar !== "undefined" ){
-        GM_registerMenuCommand('Settings', function() {
-            console.log("settings");
-          });
-    }
+    
+    settingsMenu.init(SETTINGS,settingUpdateCallback);
     
 
     if (! phpBBForumAutosaver_g_textArea ){
@@ -82,8 +79,8 @@ function Setup_PhpBBForumAutosaver(){
     let panel = CreatePanel_PhpBBForumAutosaver(phpBBForumAutosaver_g_textArea);
 
     // Retrieve a saved copy if any
-
     handleInit();
+
     // Init autosave
 
     phpBBForumAutosaver_g_interval = setInterval(()=>{
@@ -93,12 +90,25 @@ function Setup_PhpBBForumAutosaver(){
     phpBBForumAutoarchiver_g_intervalArch = setInterval(()=>{
     
         handleAutoArchive();
-    },SETTINGS.AUTOARCHIVE_MINUTES_DELAY.value*1000*60);
-
-    
-    
+    },SETTINGS.AUTOARCHIVE_MINUTES_DELAY.value*1000*60);  
 }
 
+function settingUpdateCallback(key,value){
+    if (key === "AUTOSAVE_SECONDS_DELAY"){
+        clearInterval(phpBBForumAutosaver_g_interval);
+        phpBBForumAutosaver_g_interval = setInterval(()=>{
+            handleAutoSave();
+        },value*1000);
+
+    }
+
+    if (key === "AUTOARCHIVE_MINUTES_DELAY"){
+        clearInterval(phpBBForumAutoarchiver_g_intervalArch);
+        phpBBForumAutoarchiver_g_intervalArch = setInterval(()=>{
+            handleAutoArchive();
+        },value*1000*60); 
+    }
+}
 
 function CreatePageID_PhpBBForumAutosaver(){
     const url = new URL(window.location.href);
@@ -168,7 +178,8 @@ function CreatePanel_PhpBBForumAutosaver(textarea_node){
          { icon: Save, tooltip: "Manually save post", name: "save" ,onClick: onManualSave},
          { icon: RotateCcw, tooltip: "Load last saved post", name: "loadLast", onClick: onManualLoad },
          { icon: Layers, tooltip: "Load copy - choose from saved versions", name: "loadAny", onClick: onMultiLoad },
-         { icon: Trash2, tooltip: "Delete all saved copies for this draft", name: "delete", onClick: onDelete ,spacing: true }
+         { icon: Trash2, tooltip: "Delete all saved copies for this draft", name: "delete", onClick: onDelete ,spacing: true },
+         { icon: Settings , tooltip: "Settings", name: "settings", onClick: onSettings ,spacing: true }
      ];
  
      buttons.forEach(({ icon, tooltip,name,onClick,spacing }) => {
@@ -191,12 +202,20 @@ function CreatePanel_PhpBBForumAutosaver(textarea_node){
          phpBBForumAutosaver_g_panelButtons.push(button);
      });
 
-     
+     console.log(SETTINGS.PLACE_NEAR_TEXTAREA);
+     if (SETTINGS.PLACE_NEAR_TEXTAREA.value === true){
+        let rect = textarea_node.getBoundingClientRect();
+        panel.style.left = `${rect.left + window.scrollX - 30}px`;  // X position (aligns left)
+        panel.style.top = `${rect.top + window.scrollY + 100}px`;    // Y position (aligns top)
+        panel.style.position = "absolute";
+     }
+     else{
+        panel.style.left = "20px";  
+        panel.style.top = "8rem";  
+        panel.style.position = "fixed";
 
-     let rect = textarea_node.getBoundingClientRect();
-    panel.style.left = `${rect.left + window.scrollX - 30}px`;  // X position (aligns left)
-    panel.style.top = `${rect.top + window.scrollY + 70}px`;    // Y position (aligns top)
-    panel.style.position = "absolute";
+     }
+     
     document.body.appendChild(panel);
  
      return panel;
@@ -216,6 +235,8 @@ function handleInit(){
 
 }
 function handleAutoArchive(){
+    let btn = phpBBForumAutosaver_g_panelButtons.find(el => el.id==="btn_loadAny");
+
     if (phpBBForumAutosaver_g_textArea.value === "" || phpBBForumAutosaver_g_textArea.value.length < 10 ){
         return;
     }
@@ -225,6 +246,7 @@ function handleAutoArchive(){
     if (old) {
         // if nothing has changed since last save- ignore.
         if (old.archived.at(-1).text === phpBBForumAutosaver_g_textArea.value){
+            _changeBtnColor(btn,"yellow",2000);
             return;
         }
 
@@ -243,6 +265,7 @@ function handleAutoArchive(){
     
     let json = {lastArchived: date, archived: archived}
     localStorage.setItem(phpBBForumAutosaver_g_ID_old, JSON.stringify(json)); 
+    _changeBtnColor(btn,"green",5000);
 
 }
 
@@ -273,6 +296,10 @@ function onManualLoad(){
 
     
     
+}
+
+function onSettings(){
+    settingsMenu.showSettingsWindow();
 }
 
 function onMultiLoad(){
@@ -365,11 +392,18 @@ function showArchiveWindow(archived) {
 function handleRemoveFromArch(date){
     let old = JSON.parse(localStorage.getItem( phpBBForumAutosaver_g_ID_old)); 
     let idxToRemove = old.archived.findIndex(e=>e.date === date);
-    old.archived.splice(idxToRemove,1);
-    localStorage.setItem(phpBBForumAutosaver_g_ID_old, JSON.stringify(old)); 
+    if (idxToRemove !== -1) {
+        old.archived.splice(idxToRemove,1);
+        localStorage.setItem(phpBBForumAutosaver_g_ID_old, JSON.stringify(old)); 
+    }
+    else {
+        console.warn("PhpBBForumAutosaver:","cant delete archived copy, something went wrong");
+    }
     // reopen window
     showArchiveWindow(old.archived) ;
 }
+
+
 
 Setup_PhpBBForumAutosaver();
 

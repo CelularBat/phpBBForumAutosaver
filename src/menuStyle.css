@@ -1,0 +1,66 @@
+.userscript-settings-modal-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+}
+
+.userscript-settings-modal-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    color: white;
+}
+
+.userscript-settings-modal-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.userscript-settings-modal-table th, .userscript-settings-modal-table td {
+    padding: 10px;
+    border: 1px solid #555;
+    text-align: left;
+}
+
+.userscript-settings-modal-table th {
+    background: #333;
+    color: white;
+}
+
+.userscript-settings-tooltip-cell {
+    position: relative;
+    cursor: help;
+}
+
+.userscript-settings-tooltip-cell::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    background: black;
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.userscript-settings-tooltip-cell:hover::after {
+    opacity: 1;
+}
