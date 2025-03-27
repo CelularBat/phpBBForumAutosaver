@@ -47,7 +47,7 @@ const SETTINGS = {
 import { settingsMenu } from './settingsMenu.js';
 import { createElement, Save, RotateCcw, Layers, Trash2, Settings  } from "lucide";
 
-const phpBBForumAutosaver_g_textArea = document.querySelector("textarea#message");
+const phpBBForumAutosaver_g_textArea = document.querySelector("textarea#message") || document.querySelector('textarea[name="message"]');
 var phpBBForumAutosaver_g_ID_current, phpBBForumAutosaver_g_ID_old;
 var phpBBForumAutosaver_g_interval,phpBBForumAutoarchiver_g_intervalArch;
 var phpBBForumAutosaver_g_panelButtons=[];
@@ -202,7 +202,7 @@ function CreatePanel_PhpBBForumAutosaver(textarea_node){
          phpBBForumAutosaver_g_panelButtons.push(button);
      });
 
-     console.log(SETTINGS.PLACE_NEAR_TEXTAREA);
+     
      if (SETTINGS.PLACE_NEAR_TEXTAREA.value === true){
         let rect = textarea_node.getBoundingClientRect();
         panel.style.left = `${rect.left + window.scrollX - 30}px`;  // X position (aligns left)
@@ -245,7 +245,7 @@ function handleAutoArchive(){
     let archived;
     if (old) {
         // if nothing has changed since last save- ignore.
-        if (old.archived.at(-1).text === phpBBForumAutosaver_g_textArea.value){
+        if (old.archived.length > 0 && old.archived.at(-1).text === phpBBForumAutosaver_g_textArea.value){
             _changeBtnColor(btn,"yellow",2000);
             return;
         }
@@ -403,8 +403,16 @@ function handleRemoveFromArch(date){
     showArchiveWindow(old.archived) ;
 }
 
+function detectForum(){
+    const url = new URL(window.location.href);
+    let res =  url.searchParams.get("mode") || url.includes("viewtopic");
+    return res;
+}
 
+// START OF EXECUTION
 
-Setup_PhpBBForumAutosaver();
-
+if (detectForum()){
+  
+    Setup_PhpBBForumAutosaver();
+}
 

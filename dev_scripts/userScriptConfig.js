@@ -12,4 +12,5 @@
 // @grant              GM.getValue
 // @grant              GM.setValue
 // @grant              GM_registerMenuCommand
+// @grant              GM.registerMenuCommand
 // ==/UserScript==

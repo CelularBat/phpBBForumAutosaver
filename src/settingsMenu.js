@@ -2,14 +2,21 @@ export const settingsMenu = (function () {
     var settings = {};
     var updateCb;
     var _useGM = ( (typeof GM_getValue !== "undefined" )&&(typeof GM_setValue !== "undefined" ) );
+    var _useGMdot = (!_useGM && (typeof GM !== "undefined" ));
 
 
 
-    function init(initSettings, updateCallback) {
+    async function init(initSettings, updateCallback) {
         updateCb = updateCallback;
         settings = initSettings;
 
         if (typeof GM_registerMenuCommand !== "undefined" ){
+            GM.registerMenuCommand('Settings', function() {
+                settingsMenu.showSettingsWindow();
+              });
+        }
+
+        if (_useGMdot && (typeof GM_registerMenuCommand !== "undefined" )){
             GM_registerMenuCommand('Settings', function() {
                 settingsMenu.showSettingsWindow();
               });
@@ -19,6 +26,12 @@ export const settingsMenu = (function () {
             Object.keys(settings).forEach(key=>{
                 settings[key].value = GM_getValue(key,settings[key].default);
             })
+        }
+
+        if (_useGMdot){
+            for (let key of Object.keys(settings)){
+                settings[key].value = await GM.getValue(key,settings[key].default);
+            }
         }
 
     }
@@ -76,6 +89,9 @@ export const settingsMenu = (function () {
         settings[key].value = value;
         if (_useGM){
             GM_setValue(key,value);
+        }
+        if (_useGMdot){
+            (async () => await GM.setValue(key,value))(); 
         }
         updateCb(key,value);
     }
