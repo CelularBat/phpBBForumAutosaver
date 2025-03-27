@@ -405,7 +405,7 @@ function handleRemoveFromArch(date){
 
 function detectForum(){
     const url = new URL(window.location.href);
-    let res =  url.searchParams.get("mode") || url.includes("viewtopic");
+    let res =  url.searchParams.get("mode") || url.href.includes("viewtopic");
     return res;
 }
 
